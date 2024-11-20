@@ -1,3 +1,17 @@
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;  // Usa el puerto proporcionado por Render o el predeterminado
+
+// Rutas básicas (puedes agregar más rutas si lo necesitas)
+app.get('/', (req, res) => {
+  res.send('Bot en línea');
+});
+
+// Inicia el servidor en el puerto especificado
+app.listen(PORT, () => {
+  console.log(`Servidor escuchando en el puerto ${PORT}`);
+});
+
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const axios = require('axios');
