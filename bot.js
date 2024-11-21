@@ -68,47 +68,59 @@ const TEAMS = {
   dortmund: 4,
 };
 
-client.on('ready', () => {
-  console.log(`¡Bot iniciado como ${client.user.tag}!`);
-});
-
 client.on('interactionCreate', async interaction => {
-  if (!interaction.isCommand()) return;
+  // Manejar el evento de Autocompletado
+  if (interaction.isAutocomplete()) {
+    const focusedOption = interaction.options.getFocused(); // Texto que el usuario está escribiendo
+    const teamSuggestions = Object.keys(TEAMS); // Nombres de equipos conocidos
 
-  const { commandName, options } = interaction;
+    // Filtrar los equipos basados en la entrada del usuario
+    const filteredTeams = teamSuggestions.filter(team =>
+      team.toLowerCase().startsWith(focusedOption.toLowerCase())
+    );
 
-  if (commandName === 'partidos') {
-    // Obtener parámetros
-    const team = options.getString('equipo');
-    const competition = options.getString('competicion') || null;
+    // Preparar las sugerencias en formato requerido
+    const suggestions = filteredTeams.map(team => ({
+      name: team.charAt(0).toUpperCase() + team.slice(1), // Formato: Primera letra mayúscula
+      value: team, // Valor asociado (puede ser igual o distinto al texto mostrado)
+    }));
 
-    const teamLowerCase = team.toLowerCase();
+    // Enviar respuesta con las sugerencias
+    await interaction.respond(suggestions);
+    return;
+  }
 
-    // Validar equipo
-    if (!TEAMS[teamLowerCase]) {
-      await interaction.reply(`El equipo "${team}" no está en la lista de equipos conocidos.`);
-      return;
-    }
+  // Manejar comandos (tu código actual para el comando /partidos)
+  if (interaction.isCommand()) {
+    const { commandName, options } = interaction;
 
-    const teamId = TEAMS[teamLowerCase];
+    if (commandName === 'partidos') {
+      const team = options.getString('equipo');
+      const competition = options.getString('competicion') || null;
 
-    try {
-      // Buscar partidos
-      const matches = await fetchMatches(teamId, competition);
-      // Crear respuesta
-      if (matches.length === 0) {
-        await interaction.reply(`No se encontraron partidos para el equipo **${team}**${competition ? ` en la competición **${competition}**` : ''} a partir de hoy.`);
-      } else {
-        const reply = matches
-          .slice(0, 5) // Limitar a 10 resultados
-          .map(match => 
-            `**${match.competition}**\n${match.homeTeam} vs ${match.awayTeam}\n📅 ${new Date(match.date).toLocaleString()} | Estado: ${match.status}`
-          )
-          .join('\n\n');
-        await interaction.reply(reply);
+      if (!TEAMS[team.toLowerCase()]) {
+        await interaction.reply(`El equipo "${team}" no está en la lista de equipos conocidos.`);
+        return;
       }
-    } catch (error) {
-      await interaction.reply('Hubo un problema al obtener los datos. Por favor, inténtalo de nuevo.');
+
+      const teamId = TEAMS[team.toLowerCase()];
+      try {
+        const matches = await fetchMatches(teamId, competition);
+
+        if (matches.length === 0) {
+          await interaction.reply(`No se encontraron partidos para el equipo **${team}**${competition ? ` en la competición **${competition}**` : ''} a partir de hoy.`);
+        } else {
+          const reply = matches
+            .slice(0, 5)
+            .map(match => 
+              `**${match.competition}**\n${match.homeTeam} vs ${match.awayTeam}\n📅 ${new Date(match.date).toLocaleString()} | Estado: ${match.status}`
+            )
+            .join('\n\n');
+          await interaction.reply(reply);
+        }
+      } catch (error) {
+        await interaction.reply('Hubo un problema al obtener los datos. Por favor, inténtalo de nuevo.');
+      }
     }
   }
 });
@@ -127,6 +139,7 @@ client.on('ready', async () => {
         type: 3, // STRING
         description: 'Nombre del equipo (obligatorio)',
         required: true,
+        autocomplete: true,
       },
       {
         name: 'competicion',
