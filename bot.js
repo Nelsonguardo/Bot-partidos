@@ -61,36 +61,61 @@ const TEAMS = {
   juventus: 109,
   manunited: 66,
   arsenal: 57,
-  mancity : 65,
+  mancity: 65,
   inter: 108,
   milan: 98,
   bayern: 5,
   dortmund: 4,
+  palmeiras: 1769,
+};
+
+const COMPETICION = {
+  LaLiga: 'PL',
+  SerieA: 'SA',
+  bundesLiga: 'BL1',
+  premierleague: 'PL',
+  Brasileirao: 'BSA',
+  ChampionsLeague: 'CL',
+  CopaLibertadores: 'COPA',
+  EuropaLeague: 'EL',
 };
 
 client.on('interactionCreate', async interaction => {
-  // Manejar el evento de Autocompletado
   if (interaction.isAutocomplete()) {
-    const focusedOption = interaction.options.getFocused(); // Texto que el usuario está escribiendo
-    const teamSuggestions = Object.keys(TEAMS); // Nombres de equipos conocidos
+    const focusedOption = interaction.options.getFocused(true); // Obtener el texto y el nombre del campo
+    const { name, value } = focusedOption; // `name` es el nombre del campo, `value` es el texto ingresado
 
-    // Filtrar los equipos basados en la entrada del usuario
-    const filteredTeams = teamSuggestions.filter(team =>
-      team.toLowerCase().startsWith(focusedOption.toLowerCase())
-    );
+    if (name === 'equipo') {
+      const teamSuggestions = Object.keys(TEAMS);
 
-    // Preparar las sugerencias en formato requerido
-    const suggestions = filteredTeams.map(team => ({
-      name: team.charAt(0).toUpperCase() + team.slice(1), // Formato: Primera letra mayúscula
-      value: team, // Valor asociado (puede ser igual o distinto al texto mostrado)
-    }));
+      const filteredTeams = teamSuggestions.filter(team =>
+        team.toLowerCase().startsWith(value.toLowerCase())
+      );
 
-    // Enviar respuesta con las sugerencias
-    await interaction.respond(suggestions);
-    return;
+      const suggestions = filteredTeams.map(team => ({
+        name: team.charAt(0).toUpperCase() + team.slice(1),
+        value: team,
+      }));
+
+      await interaction.respond(suggestions);
+    }
+
+    if (name === 'competicion') {
+      const competitionSuggestions = Object.keys(COMPETICION);
+
+      const filteredCompetitions = competitionSuggestions.filter(competition =>
+        competition.toLowerCase().startsWith(value.toLowerCase())
+      );
+
+      const suggestions = filteredCompetitions.map(competition => ({
+        name: competition.charAt(0).toUpperCase() + competition.slice(1),
+        value: COMPETICION[competition], // Devuelve el código real de la competición
+      }));
+
+      await interaction.respond(suggestions);
+    }
   }
 
-  // Manejar comandos (tu código actual para el comando /partidos)
   if (interaction.isCommand()) {
     const { commandName, options } = interaction;
 
@@ -112,7 +137,7 @@ client.on('interactionCreate', async interaction => {
         } else {
           const reply = matches
             .slice(0, 5)
-            .map(match => 
+            .map(match =>
               `**${match.competition}**\n${match.homeTeam} vs ${match.awayTeam}\n📅 ${new Date(match.date).toLocaleString()} | Estado: ${match.status}`
             )
             .join('\n\n');
@@ -129,7 +154,7 @@ client.on('interactionCreate', async interaction => {
 client.on('ready', async () => {
   const guildId = '1275838792896348190'; // ID del servidor
   const guild = client.guilds.cache.get(guildId);
-  
+
   await guild.commands.create({
     name: 'partidos',
     description: 'Busca los partidos de un equipo.',
@@ -146,6 +171,7 @@ client.on('ready', async () => {
         type: 3, // STRING
         description: 'Código de la competición (opcional)',
         required: false,
+        autocomplete: true,
       },
     ],
   });
