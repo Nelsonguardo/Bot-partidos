@@ -46,8 +46,6 @@ async function fetchMatches(teamId, competitionCode) {
       awayTeam: match.awayTeam.name,
       date: match.utcDate,
       status: match.status,
-      homeTeamLogo: match.homeTeam.crest,
-      awayTeamLogo: match.awayTeam.crest,
     }));
   } catch (error) {
     console.error(error);
@@ -140,9 +138,7 @@ client.on('interactionCreate', async interaction => {
           const reply = matches
             .slice(0, 5)
             .map(match =>
-              `**${match.competition}**\n` +
-              `![🏠](${match.homeTeamLogo}) ${match.homeTeam} vs ![🚩](${match.awayTeamLogo}) ${match.awayTeam}\n` +
-              `📅 ${new Date(match.date).toLocaleString()} | Estado: ${match.status}`
+              `**${match.competition}**\n${match.homeTeam} vs ${match.awayTeam}\n📅 ${new Date(match.date).toLocaleString()} | Estado: ${match.status}`
             )
             .join('\n\n');
           await interaction.reply(reply);
