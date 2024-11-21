@@ -140,7 +140,9 @@ client.on('interactionCreate', async interaction => {
           const reply = matches
             .slice(0, 5)
             .map(match =>
-              `**${match.competition}**\n${match.homeTeam} ${match.homeTeamLogo} vs ${match.awayTeam} ${match.awayTeamLogo}\n📅 ${new Date(match.date).toLocaleString()} | Estado: ${match.status}`
+              `**${match.competition}**\n` +
+              `![🏠](${match.homeTeamLogo}) ${match.homeTeam} vs ![🚩](${match.awayTeamLogo}) ${match.awayTeam}\n` +
+              `📅 ${new Date(match.date).toLocaleString()} | Estado: ${match.status}`
             )
             .join('\n\n');
           await interaction.reply(reply);
