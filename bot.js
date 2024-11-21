@@ -56,7 +56,7 @@ async function fetchMatches(teamId, competitionCode) {
 // Mapear IDs de equipos conocidos (puedes agregar más)
 const TEAMS = {
   barcelona: 81,
-  liverpool: 40,
+  liverpool: 64,
   madrid: 86,
   juventus: 109,
   manunited: 66,
